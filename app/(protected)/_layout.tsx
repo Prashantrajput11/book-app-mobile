@@ -11,7 +11,7 @@ import { useAuth } from "../../contexts/authContext";
 
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { useEffect } from "react";
-import { Text } from "react-native";
+import { ActivityIndicator, Text, View } from "react-native";
 
 export default function ProtectedLayout() {
 	const { token, user, isLoading } = useAuth();
@@ -21,7 +21,11 @@ export default function ProtectedLayout() {
 
 	if (isLoading) {
 		// You can return a loading spinner here if you want
-		return <Text>Loading...</Text>;
+		return (
+			<View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+				<ActivityIndicator size={"large"} color={"green"} />
+			</View>
+		);
 	}
 
 	const isLoggedIn = !!(token && user);
@@ -31,15 +35,6 @@ export default function ProtectedLayout() {
 	if (!isLoggedIn) {
 		return <Redirect href="/(auth)/login" />;
 	}
-	// const colorScheme = useColorScheme();
-	// const [loaded] = useFonts({
-	// 	SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
-	// });
-
-	// if (!loaded) {
-	// 	// Async font loading only occurs in development.
-	// 	return null;
-	// }
 
 	return (
 		<>

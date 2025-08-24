@@ -17,7 +17,7 @@ import { router } from "expo-router";
 import { useAuth } from "../../contexts/authContext";
 
 const LoginScreen = ({ navigation }) => {
-	const { login, isCheckingAuth } = useAuth();
+	const { login, isCheckingAuth, isLoading } = useAuth();
 	const [formData, setFormData] = useState({
 		email: "",
 		password: "",
@@ -40,7 +40,7 @@ const LoginScreen = ({ navigation }) => {
 	if (isCheckingAuth) return null;
 
 	const navigateToSignup = () => {
-		// router.push("/signup");
+		router.push("/signup");
 	};
 
 	return (
@@ -93,7 +93,7 @@ const LoginScreen = ({ navigation }) => {
 							onPress={navigateToSignup}
 						>
 							<Text style={styles.toggleButtonText}>
-								Don't have an account? Sign up
+								Dont have an account? Sign up
 							</Text>
 						</TouchableOpacity>
 					</View>

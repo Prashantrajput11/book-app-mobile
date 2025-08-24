@@ -1,321 +1,264 @@
+import { useState } from "react";
 import {
-	StyleSheet,
-	Text,
 	View,
+	Text,
+	Platform,
+	KeyboardAvoidingView,
+	ScrollView,
 	TextInput,
 	TouchableOpacity,
-	SafeAreaView,
-	ScrollView,
 	Alert,
-	KeyboardAvoidingView,
-	Platform,
+	Image,
 	ActivityIndicator,
 } from "react-native";
-import React, { useState } from "react";
-import api from "@/lib/axios";
-// Import your axios instance
+import { useRouter } from "expo-router";
+import * as ImageManipulator from "expo-image-manipulator";
+import { Ionicons } from "@expo/vector-icons";
+import styles from "../../../assets/styles/create.styles";
+import * as ImagePicker from "expo-image-picker";
+import * as FileSystem from "expo-file-system";
+import { useAuth } from "@/contexts/authContext";
+import BASE_URL from "../../../config.js";
+import COLORS from "@/constants/Colors";
 
-const CreateScreen = () => {
+export default function Create() {
 	const [title, setTitle] = useState("");
-	const [summary, setSummary] = useState("");
-	const [description, setDescription] = useState("");
+	const [caption, setCaption] = useState("");
+	const [rating, setRating] = useState(3);
+	const [image, setImage] = useState(null); // to display the selected image
+	const [imageBase64, setImageBase64] = useState(null);
 	const [loading, setLoading] = useState(false);
 
-	// Form validation
-	const isFormValid = title.trim().length > 0 && summary.trim().length > 0;
+	const router = useRouter();
+	const { token } = useAuth();
 
-	// Handle form submission
+	console.log(token);
+
+	const pickImage = async () => {
+		try {
+			// request permission if needed
+			if (Platform.OS !== "web") {
+				const { status } =
+					await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+				if (status !== "granted") {
+					Alert.alert(
+						"Permission Denied",
+						"We need camera roll permissions to upload an image"
+					);
+					return;
+				}
+			}
+
+			// launch image library
+			const result = await ImagePicker.launchImageLibraryAsync({
+				mediaTypes: "images",
+				allowsEditing: true,
+				aspect: [4, 3],
+				quality: 0.1, // lower quality for smaller base64
+				base64: true,
+			});
+
+			if (!result.canceled) {
+				setImage(result.assets[0].uri);
+
+				// if base64 is provided, use it
+
+				if (result.assets[0].base64) {
+					setImageBase64(result.assets[0].base64);
+				} else {
+					// otherwise, convert to base64
+					const base64 = await FileSystem.readAsStringAsync(
+						result.assets[0].uri,
+						{
+							encoding: FileSystem.EncodingType.Base64,
+						}
+					);
+
+					setImageBase64(base64);
+				}
+			}
+		} catch (error) {
+			console.error("Error picking image:", error);
+			Alert.alert("Error", "There was a problem selecting your image");
+		}
+	};
 	const handleSubmit = async () => {
-		if (!isFormValid) {
-			Alert.alert(
-				"Validation Error",
-				"Please fill in both title and summary fields."
-			);
+		if (!title || !caption || !image || !rating) {
+			Alert.alert("Error", "Please fill in all fields");
 			return;
 		}
 
-		setLoading(true);
-
 		try {
-			const response = await api.post("/api/ideas", {
-				title: title.trim(),
-				summary: summary.trim(),
-				description: description.trim(),
+			setLoading(true);
+
+			// get file extension from URI or default to jpeg
+			const uriParts = image.split(".");
+
+			console.log("uriParts", uriParts);
+
+			const fileType = uriParts[uriParts.length - 1];
+			const imageType = fileType
+				? `image/${fileType.toLowerCase()}`
+				: "image/jpeg";
+
+			const imageDataUrl = `data:${imageType};base64,${imageBase64}`;
+
+			const response = await fetch(`${BASE_URL}/api/books`, {
+				method: "POST",
+				headers: {
+					Authorization: `Bearer ${token}`,
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					title,
+					caption,
+					rating: rating.toString(),
+					image: imageDataUrl,
+				}),
 			});
+			console.log("res", response);
 
-			// Success feedback
-			Alert.alert("Success! 🎉", "Your idea has been saved successfully!", [
-				{
-					text: "Create Another",
-					onPress: () => {
-						setTitle("");
-						setSummary("");
-					},
-				},
-				{
-					text: "View Ideas",
-					onPress: () => {
-						// Navigate back to home or ideas list
-						// If using React Navigation: navigation.navigate('Home')
-					},
-				},
-			]);
+			const data = await response.json();
+			if (!response.ok) throw new Error(data.message || "Something went wrong");
+			console.log("data", data);
 
-			// Clear form
+			Alert.alert("Success", "Your book recommendation has been posted!");
 			setTitle("");
-			setSummary("");
-			setDescription("");
+			setCaption("");
+			setRating(3);
+			setImage(null);
+			setImageBase64(null);
+			router.push("/");
 		} catch (error) {
-			console.error("Error creating idea:", error);
-
-			Alert.alert(
-				"Error",
-				error.response?.data?.message ||
-					"Failed to create idea. Please try again.",
-				[{ text: "OK" }]
-			);
+			console.error("Error creating post:", error);
+			Alert.alert("Error", error.message || "Something went wrong");
 		} finally {
 			setLoading(false);
 		}
 	};
 
-	return (
-		<SafeAreaView style={styles.container}>
-			<KeyboardAvoidingView
-				behavior={Platform.OS === "ios" ? "padding" : "height"}
-				style={styles.keyboardView}
-			>
-				<ScrollView
-					contentContainerStyle={styles.scrollContainer}
-					showsVerticalScrollIndicator={false}
+	const renderRatingPicker = () => {
+		const stars = [];
+		for (let i = 1; i <= 5; i++) {
+			stars.push(
+				<TouchableOpacity
+					key={i}
+					onPress={() => setRating(i)}
+					style={styles.starButton}
 				>
-					{/* Header */}
+					<Ionicons
+						name={i <= rating ? "star" : "star-outline"}
+						size={32}
+						color={i <= rating ? "#f4b400" : COLORS.textSecondary}
+					/>
+				</TouchableOpacity>
+			);
+		}
+		return <View style={styles.ratingContainer}>{stars}</View>;
+	};
+
+	return (
+		<KeyboardAvoidingView
+			style={{ flex: 1 }}
+			behavior={Platform.OS === "ios" ? "padding" : "height"}
+		>
+			<ScrollView
+				contentContainerStyle={styles.container}
+				style={styles.scrollViewStyle}
+			>
+				<View style={styles.card}>
+					{/* HEADER */}
 					<View style={styles.header}>
-						<Text style={styles.pageTitle}>✨ New Idea</Text>
-						<Text style={styles.subtitle}>Capture your brilliant thoughts</Text>
+						<Text style={styles.title}>Add Book Recommendation</Text>
+						<Text style={styles.subtitle}>
+							Share your favorite reads with others
+						</Text>
 					</View>
 
-					{/* Form */}
 					<View style={styles.form}>
-						{/* Title Input */}
-						<View style={styles.inputContainer}>
-							<Text style={styles.label}>Title</Text>
-							<TextInput
-								style={[
-									styles.input,
-									styles.titleInput,
-									title.length > 0 && styles.inputFocused,
-								]}
-								placeholder="What's your idea about?"
-								placeholderTextColor="#a0aec0"
-								value={title}
-								onChangeText={setTitle}
-								multiline={false}
-								maxLength={100}
-							/>
-							<Text style={styles.charCount}>{title.length}/100</Text>
+						{/* BOOK TITLE */}
+						<View style={styles.formGroup}>
+							<Text style={styles.label}>Book Title</Text>
+							<View style={styles.inputContainer}>
+								<Ionicons
+									name="book-outline"
+									size={20}
+									color={COLORS.textSecondary}
+									style={styles.inputIcon}
+								/>
+								<TextInput
+									style={styles.input}
+									placeholder="Enter book title"
+									placeholderTextColor={COLORS.placeholderText}
+									value={title}
+									onChangeText={setTitle}
+								/>
+							</View>
 						</View>
 
-						{/* Summary Input */}
-						<View style={styles.inputContainer}>
-							<Text style={styles.label}>Summary</Text>
-							<TextInput
-								style={[
-									styles.input,
-									styles.summaryInput,
-									summary.length > 0 && styles.inputFocused,
-								]}
-								placeholder="Describe your idea in detail..."
-								placeholderTextColor="#a0aec0"
-								value={summary}
-								onChangeText={setSummary}
-								multiline={true}
-								textAlignVertical="top"
-								maxLength={500}
-							/>
-							<Text style={styles.charCount}>{summary.length}/500</Text>
+						{/* RATING */}
+						<View style={styles.formGroup}>
+							<Text style={styles.label}>Your Rating</Text>
+							{renderRatingPicker()}
 						</View>
 
-						<View style={styles.inputContainer}>
-							<Text style={styles.label}>Description</Text>
-							<TextInput
-								style={[
-									styles.input,
-									styles.summaryInput,
-									summary.length > 0 && styles.inputFocused,
-								]}
-								placeholder="Describe your idea in detail..."
-								placeholderTextColor="#a0aec0"
-								value={description}
-								onChangeText={setDescription}
-								multiline={true}
-								textAlignVertical="top"
-								maxLength={500}
-							/>
-							<Text style={styles.charCount}>{summary.length}/500</Text>
+						{/* IMAGE */}
+						<View style={styles.formGroup}>
+							<Text style={styles.label}>Book Image</Text>
+							<TouchableOpacity style={styles.imagePicker} onPress={pickImage}>
+								{image ? (
+									<Image source={{ uri: image }} style={styles.previewImage} />
+								) : (
+									<View style={styles.placeholderContainer}>
+										<Ionicons
+											name="image-outline"
+											size={40}
+											color={COLORS.textSecondary}
+										/>
+										<Text style={styles.placeholderText}>
+											Tap to select image
+										</Text>
+									</View>
+								)}
+							</TouchableOpacity>
 						</View>
 
-						{/* Submit Button */}
+						{/* CAPTION */}
+						<View style={styles.formGroup}>
+							<Text style={styles.label}>Caption</Text>
+							<TextInput
+								style={styles.textArea}
+								placeholder="Write your review or thoughts about this book..."
+								placeholderTextColor={COLORS.placeholderText}
+								value={caption}
+								onChangeText={setCaption}
+								multiline
+							/>
+						</View>
+
 						<TouchableOpacity
-							style={[
-								styles.submitButton,
-								!isFormValid && styles.submitButtonDisabled,
-							]}
+							style={styles.button}
 							onPress={handleSubmit}
-							disabled={!isFormValid || loading}
-							activeOpacity={0.8}
+							disabled={loading}
 						>
 							{loading ? (
-								<View style={styles.loadingContainer}>
-									<ActivityIndicator color="#ffffff" size="small" />
-									<Text style={styles.submitButtonText}>Creating...</Text>
-								</View>
+								<ActivityIndicator color={COLORS.white} />
 							) : (
-								<Text style={styles.submitButtonText}>💡 Save Idea</Text>
+								<>
+									<Ionicons
+										name="cloud-upload-outline"
+										size={20}
+										color={COLORS.white}
+										style={styles.buttonIcon}
+									/>
+									<Text style={styles.buttonText}>Share</Text>
+								</>
 							)}
 						</TouchableOpacity>
-
-						{/* Form Tips */}
-						<View style={styles.tipsContainer}>
-							<Text style={styles.tipsTitle}>💡 Tips:</Text>
-							<Text style={styles.tipText}>
-								• Keep your title short and descriptive
-							</Text>
-							<Text style={styles.tipText}>
-								• Add details in the summary to remember later
-							</Text>
-							<Text style={styles.tipText}>
-								• Dont worry about perfection - just capture it!
-							</Text>
-						</View>
 					</View>
-				</ScrollView>
-			</KeyboardAvoidingView>
-		</SafeAreaView>
+				</View>
+			</ScrollView>
+		</KeyboardAvoidingView>
 	);
-};
-
-export default CreateScreen;
-
-const styles = StyleSheet.create({
-	container: {
-		flex: 1,
-		backgroundColor: "#f8faff",
-	},
-	keyboardView: {
-		flex: 1,
-	},
-	scrollContainer: {
-		flexGrow: 1,
-		paddingHorizontal: 20,
-		paddingBottom: 30,
-	},
-	header: {
-		paddingTop: 20,
-		paddingBottom: 32,
-	},
-	pageTitle: {
-		fontSize: 32,
-		fontWeight: "800",
-		color: "#1a202c",
-		marginBottom: 8,
-		letterSpacing: -0.5,
-	},
-	subtitle: {
-		fontSize: 16,
-		color: "#718096",
-		fontWeight: "500",
-	},
-	form: {
-		flex: 1,
-	},
-	inputContainer: {
-		marginBottom: 24,
-	},
-	label: {
-		fontSize: 16,
-		fontWeight: "600",
-		color: "#2d3748",
-		marginBottom: 8,
-	},
-	input: {
-		backgroundColor: "#ffffff",
-		borderRadius: 12,
-		padding: 16,
-		fontSize: 16,
-		color: "#2d3748",
-		borderWidth: 2,
-		borderColor: "#e2e8f0",
-		shadowColor: "#000",
-		shadowOffset: { width: 0, height: 2 },
-		shadowOpacity: 0.05,
-		shadowRadius: 4,
-		elevation: 2,
-	},
-	inputFocused: {
-		borderColor: "#667eea",
-		shadowOpacity: 0.1,
-		elevation: 4,
-	},
-	titleInput: {
-		height: 56,
-	},
-	summaryInput: {
-		height: 120,
-		textAlignVertical: "top",
-	},
-	charCount: {
-		fontSize: 12,
-		color: "#a0aec0",
-		textAlign: "right",
-		marginTop: 4,
-	},
-	submitButton: {
-		backgroundColor: "#667eea",
-		borderRadius: 12,
-		paddingVertical: 16,
-		paddingHorizontal: 24,
-		alignItems: "center",
-		marginTop: 16,
-		shadowColor: "#667eea",
-		shadowOffset: { width: 0, height: 4 },
-		shadowOpacity: 0.3,
-		shadowRadius: 8,
-		elevation: 6,
-	},
-	submitButtonDisabled: {
-		backgroundColor: "#cbd5e0",
-		shadowOpacity: 0,
-		elevation: 0,
-	},
-	submitButtonText: {
-		color: "#ffffff",
-		fontSize: 18,
-		fontWeight: "700",
-		letterSpacing: 0.5,
-	},
-	loadingContainer: {
-		flexDirection: "row",
-		alignItems: "center",
-	},
-	tipsContainer: {
-		marginTop: 32,
-		padding: 20,
-		backgroundColor: "#ffffff",
-		borderRadius: 12,
-		borderLeftWidth: 4,
-		borderLeftColor: "#667eea",
-	},
-	tipsTitle: {
-		fontSize: 16,
-		fontWeight: "600",
-		color: "#2d3748",
-		marginBottom: 12,
-	},
-	tipText: {
-		fontSize: 14,
-		color: "#4a5568",
-		marginBottom: 6,
-		lineHeight: 20,
-	},
-});
+}
