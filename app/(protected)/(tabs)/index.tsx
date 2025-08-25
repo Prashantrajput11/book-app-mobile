@@ -4,112 +4,15 @@ import {
 	View,
 	FlatList,
 	ActivityIndicator,
-	Image,
 	SafeAreaView,
-	Pressable,
 } from "react-native";
-import React, { useEffect, useState } from "react";
-import { useAuth } from "@/contexts/authContext";
-import BASE_URL from "@/config";
+import React from "react";
 
-const BookCard = ({ item }) => (
-	<View style={styles.card}>
-		{/* Header with user info */}
-		<View style={styles.cardHeader}>
-			<Image
-				source={{ uri: item.user.profileImage }}
-				style={styles.profileImage}
-			/>
-			<Text style={styles.username}>{item.user?.username || "Unknown"}</Text>
-		</View>
-
-		{/* Book image - main focal point */}
-		<Image source={{ uri: item.image }} style={styles.cardImage} />
-
-		{/* Book details below image */}
-		<View style={styles.cardContent}>
-			<Text style={styles.cardTitle}>{item.title}</Text>
-			<View style={styles.ratingContainer}>
-				{[...Array(5)].map((_, i) => (
-					<Text key={i} style={styles.star}>
-						{i < item.rating ? "★" : "☆"}
-					</Text>
-				))}
-			</View>
-			<Text style={styles.cardCaption}>{item.caption}</Text>
-		</View>
-	</View>
-);
+import { useBooks } from "@/hooks/useBooks";
+import BookCard from "@/components/Book/BookCard";
 
 const Index = () => {
-	const { token, logout } = useAuth();
-
-	// State for pagination
-	const [books, setBooks] = useState([]);
-	const [page, setPage] = useState(1);
-	const [totalPages, setTotalPages] = useState(1);
-	const [loading, setLoading] = useState(true);
-	const [loadingMore, setLoadingMore] = useState(false);
-
-	const fetchBooks = async (pageNum = 1) => {
-		if (!token) {
-			setLoading(false);
-			return;
-		}
-
-		// Determine which loading indicator to show
-		if (pageNum === 1) {
-			setLoading(true);
-		} else {
-			setLoadingMore(true);
-		}
-
-		try {
-			const response = await fetch(
-				`${BASE_URL}/api/books?page=${pageNum}&limit=5`,
-				{
-					method: "GET",
-					headers: {
-						Authorization: `Bearer ${token}`,
-						"Content-Type": "application/json",
-					},
-				}
-			);
-
-			if (!response.ok) throw new Error("Failed to fetch books");
-
-			const json = await response.json();
-
-			console.log("json-->", json);
-
-			// If it's the first page, replace the books. Otherwise, add to the list.
-			if (pageNum === 1) {
-				setBooks(json.books);
-			} else {
-				setBooks((prevBooks) => [...prevBooks, ...json.books]);
-			}
-			setPage(json.currentPage);
-			setTotalPages(json.totalPages);
-		} catch (error) {
-			console.log("error fetching books", error.message);
-		} finally {
-			setLoading(false);
-			setLoadingMore(false);
-		}
-	};
-
-	useEffect(() => {
-		fetchBooks();
-	}, [token]);
-
-	// Called when the list is scrolled to the bottom
-	const handleLoadMore = () => {
-		// Don't fetch more if we're already loading or have reached the last page
-		if (loadingMore || page >= totalPages) {
-			return;
-		}
-		fetchBooks(page + 1);
-	};
+	const { books, loading, loadingMore, handleLoadMore } = useBooks();
 
 	const renderFooter = () => {
 		if (!loadingMore) return null;
@@ -130,9 +33,6 @@ const Index = () => {
 		<SafeAreaView style={styles.container}>
 			<View style={styles.header}>
 				<Text style={styles.headerTitle}>Book Recommendations</Text>
-				<Pressable onPress={logout} style={styles.logoutButton}>
-					<Text style={styles.logoutText}>Logout</Text>
-				</Pressable>
 			</View>
 			<FlatList
 				data={books}

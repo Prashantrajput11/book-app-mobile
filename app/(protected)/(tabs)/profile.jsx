@@ -6,6 +6,7 @@ import {
 	SafeAreaView,
 	ActivityIndicator,
 	Image,
+	Pressable,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/authContext";
@@ -46,7 +47,7 @@ const BookListItem = ({ item }) => (
 );
 
 const Profile = () => {
-	const { user, token } = useAuth();
+	const { user, token, logout } = useAuth();
 	const [books, setBooks] = useState([]);
 	const [loading, setLoading] = useState(true);
 
@@ -107,6 +108,10 @@ const Profile = () => {
 				}
 				contentContainerStyle={styles.listContainer}
 			/>
+
+			<Pressable onPress={logout} style={styles.logoutButton}>
+				<Text style={styles.logoutText}>Logout</Text>
+			</Pressable>
 		</SafeAreaView>
 	);
 };
