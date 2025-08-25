@@ -1,50 +1,30 @@
-# Welcome to your Expo app 👋
+![Uploading image.png…]()
+📚 BookHub – Your Personal Book Recommendation API
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A simple backend service built with Node.js, Express, and MongoDB to manage users, books, and personalized recommendations.
 
-## Get started
+🚀 Features
 
-1. Install dependencies
+👤 User Management – register, login, authenticate via JWT.
 
-   ```bash
-   npm install
-   ```
+📖 Book Management – add, update, delete, and fetch books.
 
-2. Start the app
+🎯 Personalized Recommendations – fetch books recommended by other users or system.
 
-   ```bash
-   npx expo start
-   ```
+🔍 Search & Filter – query books by title, author, or tags.
 
-In the output, you'll find options to open the app in a
+🌐 Deployed on Render – production-ready with MongoDB Atlas.
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+🛠️ Tech Stack
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+Backend: Node.js, Express
 
-## Get a fresh project
+Database: MongoDB (Mongoose ORM)
 
-When you're ready, run:
+Auth: JWT Authentication & bcrypt for password hashing
 
-```bash
-npm run reset-project
-```
+Hosting: Render
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
 
-## Learn more
 
-To learn more about developing your project with Expo, look at the following resources:
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
