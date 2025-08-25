@@ -26,16 +26,5 @@ Auth: JWT Authentication & bcrypt for password hashing
 Hosting: Render
 
 
-bookhub-backend/
-│── src/
-│   ├── controllers/    # Business logic (users, books, recommendations)
-│   ├── models/         # Mongoose schemas
-│   ├── routes/         # Express routes
-│   ├── middlewares/    # Auth & validation
-│   ├── utils/          # Helper functions
-│   └── server.js       # Entry point
-│
-├── .env                # Environment variables
-├── package.json
-└── README.md
+
 
