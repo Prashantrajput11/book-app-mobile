@@ -16,9 +16,6 @@ import { ActivityIndicator, Text, View } from "react-native";
 export default function ProtectedLayout() {
 	const { token, user, isLoading } = useAuth();
 
-	console.log("token in pl", token);
-	console.log("user in pl", user);
-
 	if (isLoading) {
 		// You can return a loading spinner here if you want
 		return (
