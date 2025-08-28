@@ -1,7 +1,8 @@
 import { StyleSheet, Text, View, Image } from "react-native";
 import React from "react";
+import Rating from "../ui/Rating";
 
-const BookCard = ({ item }) => (
+const BookCard = ({ item, isMyBook }) => (
 	<View style={styles.card}>
 		{/* Header with user info */}
 		<View style={styles.cardHeader}>
@@ -9,7 +10,9 @@ const BookCard = ({ item }) => (
 				source={{ uri: item.user.profileImage }}
 				style={styles.profileImage}
 			/>
-			<Text style={styles.username}>{item.user?.username || "Unknown"}</Text>
+			{!isMyBook && (
+				<Text style={styles.username}>{item.user?.username || "Unknown"}</Text>
+			)}
 		</View>
 
 		{/* Book image - main focal point */}
@@ -18,13 +21,8 @@ const BookCard = ({ item }) => (
 		{/* Book details below image */}
 		<View style={styles.cardContent}>
 			<Text style={styles.cardTitle}>{item.title}</Text>
-			<View style={styles.ratingContainer}>
-				{[...Array(5)].map((_, i) => (
-					<Text key={i} style={styles.star}>
-						{i < item.rating ? "★" : "☆"}
-					</Text>
-				))}
-			</View>
+
+			<Rating rating={item.rating} />
 			<Text style={styles.cardCaption}>{item.caption}</Text>
 		</View>
 	</View>

@@ -11,7 +11,8 @@ import { useAuth } from "../../contexts/authContext";
 
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { useEffect } from "react";
-import { ActivityIndicator, Text, View } from "react-native";
+import { ActivityIndicator, Platform, Text, View } from "react-native";
+import { HapticTab } from "@/components/HapticTab";
 
 export default function ProtectedLayout() {
 	const { token, user, isLoading } = useAuth();
@@ -35,7 +36,20 @@ export default function ProtectedLayout() {
 
 	return (
 		<>
-			<Stack>
+			<Stack
+				screenOptions={{
+					headerShown: false,
+					// tabBarButton: HapticTab,
+					// tabBarBackground: TabBarBackground,
+					// tabBarStyle: Platform.select({
+					// 	ios: {
+					// 		// Use a transparent background on iOS to show the blur effect
+					// 		position: "absolute",
+					// 	},
+					// 	default: {},
+					// }),
+				}}
+			>
 				<Stack.Screen name="(tabs)" options={{ headerShown: false }} />
 				<Stack.Screen name="+not-found" />
 			</Stack>

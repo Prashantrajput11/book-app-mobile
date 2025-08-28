@@ -25,6 +25,11 @@ export const fetchAllBooksByUser = async () => {
 
 	return response.data;
 };
+export const deleteBookByUser = async (bookId) => {
+	const response = await api.delete(`api/books/${bookId}`);
+
+	return response.data;
+};
 
 // Data sorting
 export const sortMyBooksByRating = (myBooks) => {

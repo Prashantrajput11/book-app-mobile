@@ -1,16 +1,31 @@
 // FOREST
+// const COLORS = {
+// 	primary: "#4CAF50",
+// 	textPrimary: "#2e5a2e",
+// 	textSecondary: "#688f68",
+// 	textDark: "#1b361b",
+// 	placeholderText: "#767676",
+// 	background: "#e8f5e9",
+// 	cardBackground: "#f1f8f2",
+// 	inputBackground: "#f4faf5",
+// 	border: "#c8e6c9",
+// 	white: "#ffffff",
+// 	black: "#000000",
+// };
+
 const COLORS = {
-	primary: "#4CAF50",
-	textPrimary: "#2e5a2e",
-	textSecondary: "#688f68",
-	textDark: "#1b361b",
-	placeholderText: "#767676",
-	background: "#e8f5e9",
-	cardBackground: "#f1f8f2",
-	inputBackground: "#f4faf5",
-	border: "#c8e6c9",
-	white: "#ffffff",
-	black: "#000000",
+	// --- Brand Colors ---
+	primary: "#669bbc", // Use for main buttons, headers, and active icons.
+	accent: "#c1121f", // Use for important actions, alerts, or destructive buttons like 'Delete'.
+
+	// --- Background Colors ---
+	backgroundDark: "#003049",
+	backgroundDarkShade_1: "#33596d",
+	backgroundLight: "#FFFFFF", // Standard light background for screens and cards.
+
+	// --- Text Colors ---
+	// Main text color for high readability on light backgrounds.
+	textSecondary: "#6c757d", // Use for subtitles, captions, or less important text.
 };
 
 // RETRO

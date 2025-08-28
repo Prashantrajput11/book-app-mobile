@@ -12,6 +12,8 @@ import {
 import React, { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/authContext";
 import { useBooksByUser } from "@/hooks/useBooksByUser";
+import BookCard from "@/components/Book/BookCard";
+import MyBooksCard from "@/components/Book/MyBooksCard";
 
 const { width } = Dimensions.get("window");
 
@@ -40,40 +42,6 @@ const UserInfoHeader = ({ user }) => (
 			<View style={styles.titleContainer}>
 				<Text style={styles.headerTitle}>My Recommendations</Text>
 				<View style={styles.titleUnderline} />
-			</View>
-		</View>
-	</View>
-);
-
-const BookListItem = ({ item, index }) => (
-	<View style={[styles.bookItem, { marginLeft: index % 2 === 0 ? 0 : 8 }]}>
-		<View style={styles.bookImageContainer}>
-			<Image
-				source={{
-					uri:
-						item.image ||
-						"https://via.placeholder.com/60x90/E0E0E0/666666?text=Book",
-				}}
-				style={styles.bookImage}
-			/>
-			<View style={styles.ratingBadge}>
-				<Text style={styles.ratingText}>{item.rating}</Text>
-				<Text style={styles.starIcon}>⭐</Text>
-			</View>
-		</View>
-		<View style={styles.bookInfo}>
-			<Text style={styles.bookTitle} numberOfLines={2}>
-				{item.title}
-			</Text>
-			<View style={styles.ratingContainer}>
-				{[...Array(5)].map((_, i) => (
-					<Text
-						key={i}
-						style={[styles.star, { opacity: i < item.rating ? 1 : 0.3 }]}
-					>
-						★
-					</Text>
-				))}
 			</View>
 		</View>
 	</View>
@@ -114,7 +82,7 @@ const Profile = () => {
 			<FlatList
 				data={myBooks}
 				renderItem={({ item, index }) => (
-					<BookListItem item={item} index={index} />
+					<MyBooksCard item={item} index={index} isMyBook={true} />
 				)}
 				keyExtractor={(item) => item._id}
 				// numColumns={2}
@@ -146,18 +114,6 @@ const Profile = () => {
 				contentContainerStyle={styles.listContainer}
 				showsVerticalScrollIndicator={false}
 			/>
-
-			{/* <View style={styles.logoutContainer}>
-				<Pressable
-					onPress={logout}
-					style={({ pressed }) => [
-						styles.logoutButton,
-						{ opacity: pressed ? 0.8 : 1 },
-					]}
-				>
-					<Text style={styles.logoutText}>🚪 Logout</Text>
-				</Pressable>
-			</View> */}
 		</SafeAreaView>
 	);
 };
