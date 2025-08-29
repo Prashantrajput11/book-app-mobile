@@ -2,7 +2,7 @@ import { StyleSheet, Text, View, Image } from "react-native";
 import React from "react";
 import Rating from "../ui/Rating";
 
-const BookCard = ({ item, isMyBook }) => (
+const BookCard = ({ item, isMyBook, onDeleteSuccess }) => (
 	<View style={styles.card}>
 		{/* Header with user info */}
 		<View style={styles.cardHeader}>

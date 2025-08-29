@@ -4,14 +4,13 @@ import FontAwesome from "@expo/vector-icons/FontAwesome";
 import Rating from "../ui/Rating";
 import { deleteBookByUser } from "@/services/bookService";
 
-const MyBooksCrad = ({ item }) => {
+const MyBooksCrad = ({ item, onDeleteSuccess }) => {
 	console.log("item", item);
 
-	const handleDeletePress = () => {
-		// Ask for confirmation before deleting
-		Alert.alert("Delete Book", "Are you sure you want to delete this book?", [
+	const confirmDelete = () => {
+		Alert.alert("Are you sure?", "This action cannot be undone.", [
 			{ text: "Cancel", style: "cancel" },
-			{ text: "OK", onPress: () => handleDeleteBook() },
+			{ text: "Delete", style: "destructive", onPress: handleDeleteBook },
 		]);
 	};
 
@@ -19,7 +18,11 @@ const MyBooksCrad = ({ item }) => {
 		try {
 			await deleteBookByUser(item._id);
 			Alert.alert("Success", "Book deleted successfully.");
+
 			// Call the onDelete function passed from the parent to refresh the list
+			if (onDeleteSuccess) {
+				onDeleteSuccess();
+			}
 		} catch (error) {
 			// Add error handling
 			Alert.alert("Error", "Failed to delete the book.");
@@ -45,7 +48,7 @@ const MyBooksCrad = ({ item }) => {
 				<Text style={styles.bookDate}>3/09/2025</Text>
 			</View>
 
-			<Pressable onPress={handleDeletePress}>
+			<Pressable onPress={confirmDelete}>
 				<FontAwesome name="trash" size={24} color="#adb5bd" />
 			</Pressable>
 		</View>

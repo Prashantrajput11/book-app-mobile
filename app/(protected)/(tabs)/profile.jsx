@@ -14,6 +14,7 @@ import { useAuth } from "@/contexts/authContext";
 import { useBooksByUser } from "@/hooks/useBooksByUser";
 import BookCard from "@/components/Book/BookCard";
 import MyBooksCard from "@/components/Book/MyBooksCard";
+import { useMyBooks } from "@/hooks/useMyBooks";
 
 const { width } = Dimensions.get("window");
 
@@ -48,11 +49,11 @@ const UserInfoHeader = ({ user }) => (
 );
 
 const Profile = () => {
-	const { myBooks, error, loading, user } = useBooksByUser();
-	const { logout } = useAuth();
+	const { myBooks, error, isError, isLoading, refetchBooks } = useMyBooks();
+	const { logout, user } = useAuth();
 
 	// Show a loading spinner while fetching data
-	if (loading) {
+	if (isLoading) {
 		return (
 			<View style={styles.center}>
 				<View style={styles.loadingContainer}>
@@ -63,7 +64,7 @@ const Profile = () => {
 		);
 	}
 
-	if (error)
+	if (isError)
 		return (
 			<View style={styles.center}>
 				<View style={styles.errorContainer}>
@@ -82,7 +83,12 @@ const Profile = () => {
 			<FlatList
 				data={myBooks}
 				renderItem={({ item, index }) => (
-					<MyBooksCard item={item} index={index} isMyBook={true} />
+					<MyBooksCard
+						item={item}
+						index={index}
+						isMyBook={true}
+						onDeleteSuccess={refetchBooks}
+					/>
 				)}
 				keyExtractor={(item) => item._id}
 				// numColumns={2}
