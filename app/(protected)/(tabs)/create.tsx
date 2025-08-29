@@ -83,6 +83,7 @@ export default function Create() {
 			Alert.alert("Error", "There was a problem selecting your image");
 		}
 	};
+
 	const handleSubmit = async () => {
 		if (!title || !caption || !image || !rating) {
 			Alert.alert("Error", "Please fill in all fields");
@@ -94,8 +95,6 @@ export default function Create() {
 
 			// get file extension from URI or default to jpeg
 			const uriParts = image.split(".");
-
-			console.log("uriParts", uriParts);
 
 			const fileType = uriParts[uriParts.length - 1];
 			const imageType = fileType
@@ -117,7 +116,6 @@ export default function Create() {
 					image: imageDataUrl,
 				}),
 			});
-			console.log("res", response);
 
 			const data = await response.json();
 			if (!response.ok) throw new Error(data.message || "Something went wrong");

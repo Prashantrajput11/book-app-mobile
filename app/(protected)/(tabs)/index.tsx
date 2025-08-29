@@ -8,17 +8,20 @@ import {
 	Image,
 	Pressable,
 } from "react-native";
-import React from "react";
+import React, { useCallback, useState } from "react";
 
 import { useBooks } from "@/hooks/useBooks";
-import BookCard from "@/components/Book/BookCard";
+
 import COLORS from "@/constants/Colors";
 import commonStyles from "@/constants/commonStyles";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
-import TopRatedBook from "@/components/Book/TopRatedBook";
+import { BookCard, TopRatedBook } from "@/components/Book/BookCard";
+import { Book } from "@/types";
+import { ListRenderItem } from "react-native";
 
 const Index = () => {
 	const { books, loading, loadingMore, handleLoadMore } = useBooks();
+	const [count, setCount] = useState(0); // <-- Add a counter
 
 	const renderFooter = () => {
 		if (!loadingMore) return null;
@@ -26,6 +29,10 @@ const Index = () => {
 			<ActivityIndicator style={{ padding: 20 }} size="large" color="#007bff" />
 		);
 	};
+
+	const renderItem: ListRenderItem<Book> = useCallback(({ item }) => {
+		return <BookCard item={item} />;
+	}, []);
 
 	if (loading) {
 		return (
@@ -37,6 +44,18 @@ const Index = () => {
 
 	return (
 		<SafeAreaView style={styles.container}>
+			<Pressable onPress={() => setCount((c) => c + 1)}>
+				<Text
+					style={{
+						textAlign: "center",
+						padding: 10,
+						color: "white",
+						backgroundColor: "blue",
+					}}
+				>
+					Re-render Parent: {count}
+				</Text>
+			</Pressable>
 			<View style={[commonStyles.p_12, commonStyles.m_b_10]}>
 				<Text style={styles.headerTitle}>Book Recommendations</Text>
 				<View style={styles.underline}></View>
@@ -73,7 +92,7 @@ const Index = () => {
 
 			<FlatList
 				data={books}
-				renderItem={({ item }) => <BookCard item={item} />}
+				renderItem={renderItem}
 				keyExtractor={(item) => item._id}
 				contentContainerStyle={styles.list}
 				ListHeaderComponent={<TopRatedBook />}

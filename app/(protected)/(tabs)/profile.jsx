@@ -11,9 +11,9 @@ import {
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/authContext";
-import { useBooksByUser } from "@/hooks/useBooksByUser";
-import BookCard from "@/components/Book/BookCard";
-import MyBooksCard from "@/components/Book/MyBooksCard";
+import { useBooksByUser } from "@/hooks/useBooksByUser_LEGACY";
+import BookCard from "@/components/Book/BookCard/BookCard";
+import MyBooksCard from "@/components/Book/MyBookCard/MyBooksCard";
 import { useMyBooks } from "@/hooks/useMyBooks";
 
 const { width } = Dimensions.get("window");

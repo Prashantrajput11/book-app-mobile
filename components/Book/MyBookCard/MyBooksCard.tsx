@@ -1,10 +1,15 @@
 import { Alert, Image, Pressable, StyleSheet, Text, View } from "react-native";
 import React from "react";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-import Rating from "../ui/Rating";
+import Rating from "../../ui/Rating";
 import { deleteBookByUser } from "@/services/bookService";
+import { Book } from "@/types";
 
-const MyBooksCrad = ({ item, onDeleteSuccess }) => {
+type BookCardProps = {
+	item: Book;
+	onDeleteSuccess: () => void;
+};
+const MyBooksCrad = ({ item, onDeleteSuccess }: BookCardProps) => {
 	console.log("item", item);
 
 	const confirmDelete = () => {
