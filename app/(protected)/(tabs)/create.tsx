@@ -17,70 +17,50 @@ import { Ionicons } from "@expo/vector-icons";
 import styles from "../../../assets/styles/create.styles";
 import * as ImagePicker from "expo-image-picker";
 import * as FileSystem from "expo-file-system";
-import { useAuth } from "@/contexts/authContext";
-import BASE_URL from "../../../config.js";
+
 import COLORS from "@/constants/Colors";
+import { useCreateBook } from "@/hooks/useCreateBook";
 
 export default function Create() {
 	const [title, setTitle] = useState("");
 	const [caption, setCaption] = useState("");
 	const [rating, setRating] = useState(3);
 	const [image, setImage] = useState(null); // to display the selected image
-	const [imageBase64, setImageBase64] = useState(null);
-	const [loading, setLoading] = useState(false);
+
+	const { mutate: createBook, isPending } = useCreateBook();
 
 	const router = useRouter();
-	const { token } = useAuth();
-
-	console.log(token);
 
 	const pickImage = async () => {
-		try {
-			// request permission if needed
-			if (Platform.OS !== "web") {
-				const { status } =
-					await ImagePicker.requestMediaLibraryPermissionsAsync();
+		// request permission if needed
+		console.log("picker");
 
-				if (status !== "granted") {
-					Alert.alert(
-						"Permission Denied",
-						"We need camera roll permissions to upload an image"
-					);
-					return;
-				}
+		if (Platform.OS !== "web") {
+			const { status } =
+				await ImagePicker.requestMediaLibraryPermissionsAsync();
+			console.log("status", status);
+
+			if (status !== "granted") {
+				Alert.alert(
+					"Permission Denied",
+					"We need camera roll permissions to upload an image"
+				);
+				return;
 			}
+		}
 
-			// launch image library
-			const result = await ImagePicker.launchImageLibraryAsync({
-				mediaTypes: "images",
-				allowsEditing: true,
-				aspect: [4, 3],
-				quality: 0.1, // lower quality for smaller base64
-				base64: true,
-			});
+		const result = await ImagePicker.launchImageLibraryAsync({
+			mediaTypes: "images",
+			allowsEditing: true,
+			aspect: [4, 3],
+			quality: 1, // You can use higher quality now
+		});
 
-			if (!result.canceled) {
-				setImage(result.assets[0].uri);
+		console.log("result", result);
 
-				// if base64 is provided, use it
-
-				if (result.assets[0].base64) {
-					setImageBase64(result.assets[0].base64);
-				} else {
-					// otherwise, convert to base64
-					const base64 = await FileSystem.readAsStringAsync(
-						result.assets[0].uri,
-						{
-							encoding: FileSystem.EncodingType.Base64,
-						}
-					);
-
-					setImageBase64(base64);
-				}
-			}
-		} catch (error) {
-			console.error("Error picking image:", error);
-			Alert.alert("Error", "There was a problem selecting your image");
+		if (!result.canceled) {
+			// You only need to set the image URI
+			setImage(result.assets[0].uri);
 		}
 	};
 
@@ -90,50 +70,32 @@ export default function Create() {
 			return;
 		}
 
-		try {
-			setLoading(true);
+		// 1. Create a FormData object
+		const formData = new FormData();
 
-			// get file extension from URI or default to jpeg
-			const uriParts = image.split(".");
+		// 2. Append the text fields
+		formData.append("title", title);
+		formData.append("caption", caption);
+		formData.append("rating", rating.toString());
 
-			const fileType = uriParts[uriParts.length - 1];
-			const imageType = fileType
-				? `image/${fileType.toLowerCase()}`
-				: "image/jpeg";
+		// 3. Append the image file itself.
+		// The name 'image' MUST match what your backend expects (e.g., multer's .single('image')).
+		formData.append("image", {
+			uri: image, // The URI from ImagePicker
+			name: `photo.${image.split(".").pop()}`, // Create a filename, e.g., 'photo.jpg'
+			type: `image/${image.split(".").pop()}`, // Create the MIME type, e.g., 'image/jpeg'
+		});
 
-			const imageDataUrl = `data:${imageType};base64,${imageBase64}`;
-
-			const response = await fetch(`${BASE_URL}/api/books`, {
-				method: "POST",
-				headers: {
-					Authorization: `Bearer ${token}`,
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify({
-					title,
-					caption,
-					rating: rating.toString(),
-					image: imageDataUrl,
-				}),
-			});
-
-			const data = await response.json();
-			if (!response.ok) throw new Error(data.message || "Something went wrong");
-			console.log("data", data);
-
-			Alert.alert("Success", "Your book recommendation has been posted!");
-			setTitle("");
-			setCaption("");
-			setRating(3);
-			setImage(null);
-			setImageBase64(null);
-			router.push("/");
-		} catch (error) {
-			console.error("Error creating post:", error);
-			Alert.alert("Error", error.message || "Something went wrong");
-		} finally {
-			setLoading(false);
-		}
+		// Call the mutate function
+		createBook(formData, {
+			onSuccess: () => {
+				Alert.alert("Success", "Your book has been posted!");
+				router.push("/"); // Navigate home
+			},
+			onError: (error) => {
+				Alert.alert("Error", error.message || "Something went wrong");
+			},
+		});
 	};
 
 	const renderRatingPicker = () => {
@@ -238,9 +200,9 @@ export default function Create() {
 						<TouchableOpacity
 							style={styles.button}
 							onPress={handleSubmit}
-							disabled={loading}
+							disabled={isPending}
 						>
-							{loading ? (
+							{isPending ? (
 								<ActivityIndicator color={COLORS.white} />
 							) : (
 								<>

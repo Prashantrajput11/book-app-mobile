@@ -12,6 +12,6 @@
 		".expo/types/**/*.ts",
 		"expo-env.d.ts",
 		"app/(protected)/(tabs)/_layout.js",
-		"app/(protected)/(tabs)/profile.jsx"
+		"app/(protected)/(tabs)/profile.tsx"
 	]
 }

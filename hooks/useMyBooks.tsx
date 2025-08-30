@@ -13,6 +13,7 @@ export const useMyBooks = () => {
 		data: rawBooks,
 		isLoading,
 		error,
+		isError,
 		refetch,
 	} = useQuery({
 		queryKey: ["myBooks", user?._id],
@@ -31,7 +32,8 @@ export const useMyBooks = () => {
 		user,
 
 		// UI state
-		loading: isLoading,
+		isLoading,
+		isError,
 		error,
 
 		// Actions

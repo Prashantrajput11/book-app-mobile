@@ -9,16 +9,19 @@ import {
 	Pressable,
 	Dimensions,
 } from "react-native";
-import React, { useEffect, useState } from "react";
-import { useAuth } from "@/contexts/authContext";
-import { useBooksByUser } from "@/hooks/useBooksByUser_LEGACY";
-import BookCard from "@/components/Book/BookCard/BookCard";
-import MyBooksCard from "@/components/Book/MyBookCard/MyBooksCard";
+import React from "react";
+
 import { useMyBooks } from "@/hooks/useMyBooks";
+import { useAuth } from "@/contexts/authContext";
+import { MyBooksCard } from "@/components/Book/MyBookCard";
+import { IUser } from "@/types";
 
 const { width } = Dimensions.get("window");
 
-const UserInfoHeader = ({ user }) => (
+type UserInfoHeaderProps = {
+	user: IUser;
+};
+const UserInfoHeader = ({ user }: UserInfoHeaderProps) => (
 	<View style={styles.headerContainer}>
 		<View style={styles.profileSection}>
 			<View style={styles.profileImageContainer}>
@@ -73,7 +76,7 @@ const Profile = () => {
 					<Text style={styles.errorMessage}>
 						Sorry, we could not load your books.
 					</Text>
-					<Text style={styles.errorDetails}>{error.message}</Text>
+					<Text style={styles.errorDetails}>{error?.message}</Text>
 				</View>
 			</View>
 		);
@@ -83,16 +86,9 @@ const Profile = () => {
 			<FlatList
 				data={myBooks}
 				renderItem={({ item, index }) => (
-					<MyBooksCard
-						item={item}
-						index={index}
-						isMyBook={true}
-						onDeleteSuccess={refetchBooks}
-					/>
+					<MyBooksCard item={item} onDeleteSuccess={refetchBooks} />
 				)}
 				keyExtractor={(item) => item._id}
-				// numColumns={2}
-				// columnWrapperStyle={styles.row}
 				ListHeaderComponent={<UserInfoHeader user={user} />}
 				ListEmptyComponent={
 					<View style={styles.emptyContainer}>

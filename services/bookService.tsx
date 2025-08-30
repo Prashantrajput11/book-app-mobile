@@ -1,4 +1,10 @@
 import api from "../lib/axios.js";
+
+export const createBookAPI = async (bookData) => {
+	const response = await api.post("/api/books", bookData);
+	return response.data;
+};
+
 export const fetchAllBooks = async (pageNum) => {
 	try {
 		const response = await api.get("/api/books", {
@@ -25,6 +31,7 @@ export const fetchAllBooksByUser = async () => {
 
 	return response.data;
 };
+
 export const deleteBookByUser = async (bookId) => {
 	const response = await api.delete(`api/books/${bookId}`);
 

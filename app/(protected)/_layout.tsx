@@ -3,16 +3,13 @@ import {
 	DefaultTheme,
 	ThemeProvider,
 } from "@react-navigation/native";
-import { useFonts } from "expo-font";
+
 import { Redirect, Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import "react-native-reanimated";
 import { useAuth } from "../../contexts/authContext";
 
-import { useColorScheme } from "@/hooks/useColorScheme";
-import { useEffect } from "react";
-import { ActivityIndicator, Platform, Text, View } from "react-native";
-import { HapticTab } from "@/components/HapticTab";
+import { ActivityIndicator, View } from "react-native";
 
 export default function ProtectedLayout() {
 	const { token, user, isLoading } = useAuth();
@@ -28,7 +25,7 @@ export default function ProtectedLayout() {
 
 	const isLoggedIn = !!(token && user);
 
-	console.log("isloggedin", isLoggedIn);
+	console.log("isloggedin", __DEV__ && isLoggedIn);
 
 	if (!isLoggedIn) {
 		return <Redirect href="/(auth)/login" />;
